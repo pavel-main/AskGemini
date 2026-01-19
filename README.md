@@ -162,12 +162,3 @@ void loop() {
 }
 ```
 
----
-
-## 📚 Future Enhancements
-
-- Optional retry logic  
-- Timeout configuration  
-- Streaming mode  
-- Structured error objects  
-- Example folder with multiple sketches  
