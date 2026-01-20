@@ -117,5 +117,4 @@ MIT License.
 See LICENSE.txt for details.
 
 ## Credits
-Created by William E. Webb  
-Designed for clarity, reliability, and embedded AI experimentation.
+Created by William E. Webb
