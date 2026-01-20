@@ -1,164 +1,113 @@
-# AskGemini — Hardened Gemini API Wrapper for ESP32
+# AskGemini — Lightweight Gemini Client for ESP32 (S3‑Optimized)
 
-`AskGemini` is a lightweight Arduino‑style library that provides a robust, fault‑tolerant interface to Google’s Gemini Flash API. It is designed for embedded devices such as the ESP32‑S3, where reliability, predictable behavior, and clean JSON handling matter.
+A minimal, fast, Arduino‑friendly library for calling Google Gemini models from ESP32 boards — optimized for ESP32‑S3 stability, TLS performance, and clean JSON parsing.
 
-This library wraps the full request/response cycle:
+AskGemini is designed for:
+- Voice assistants
+- Embedded AI devices
+- Robotics
+- IoT dashboards
+- Creative LLM experiments on microcontrollers
 
-- JSON escaping  
-- instruction + user prompt assembly  
-- HTTP POST  
-- hardened response parsing  
-- error handling hooks  
+## Features
+- Simple one‑call API:
+  String reply = askGemini(prompt, instruction, temperature);
+- Works with Gemini 2.0 Flash and other text‑capable models
+- Persistent TLS client for fast HTTPS on ESP32‑S3
+- Clean JSON extraction (no heavy JSON libraries)
+- Optional text sanitizer for TTS engines
+- Three polished examples:
+  - BasicUsage
+  - InstructionMode
+  - RepeatMode
 
-It is ideal for projects that need deterministic, low‑latency text generation from Gemini Flash.
+## Requirements
 
----
+### ESP32 Arduino Core 3.x (Required)
+AskGemini uses the modern HTTPS API:
+- WiFiClientSecure
+- client.setInsecure()
+- http.begin(client, url)
 
-## ✨ Features
+These functions do not exist in ESP32 Core 2.x.
 
-- Simple API:  
-  ```cpp
-  askGemini(userText, instruction, temperature);
-  ```
-- Hardened JSON escaping for safe payload construction  
-- Instruction‑first prompting for consistent model behavior  
-- Deterministic temperature control  
-- Graceful error handling via user‑supplied callback  
-- Portable: no global state except your API key  
-- Optional sanitization helper for safe display strings  
-- Compatible with ESP32/ESP32‑S3 using Arduino framework  
+### Supported Boards
+- ESP32‑S3
+- ESP32‑S2
+- ESP32‑C3
+- ESP32 classic
+(As long as they run Arduino Core 3.x)
 
----
+### Not Supported
+- ESP32 Arduino Core 2.x
+- Boards without HTTPS capability
 
-## 📦 Installation
+## Installation
+1. Install ESP32 Arduino Core 3.x  
+   Arduino IDE → Boards Manager → search “esp32” → install 3.x.x
+2. Download or clone this repository
+3. Place the folder into:
+   Documents/Arduino/libraries/AskGemini
+4. Restart Arduino IDE
+5. Open File → Examples → AskGemini
 
-1. Create a folder named `AskGemini`
-2. Place the following files inside:
-   - `AskGemini.h`
-   - `AskGemini.cpp`
-   - `library.properties`
-3. Drop the folder into your Arduino `libraries/` directory
-4. Restart the Arduino IDE
+## Setup in Your Sketch
 
----
+### Define your credentials:
+String Gemini_APIKey = "YOUR_API_KEY";
+String Gemini_Model  = "gemini-2.0-flash";
 
-## 🚀 Quick Start
+### Provide an error handler:
+void errorHandler(int code) {
+  Serial.printf("AskGemini error: %d\n", code);
+}
 
-### Include the library
-
-```cpp
-#include <AskGemini.h>
-```
-
-### Provide your API key
-
-```cpp
-String Gemini_APIKey = "YOUR_API_KEY_HERE";
-```
-
-### Call the function
-
-```cpp
+## Basic Example
 String reply = askGemini(
-    "Fix this sentence: I did not see nuthen.",
-    "You are a grammar‑correcting assistant. ",
-    0.0
+  "Tell me a fun fact about space.",
+  "Respond with one concise sentence.",
+  0.2
 );
-
 Serial.println(reply);
-```
 
----
+## Instruction Mode Example
+String concise = askGemini("What is a microcontroller?",
+                           "Respond with one short, clear sentence.",
+                           0.1);
 
-## 🧠 API Overview
+String friendly = askGemini("What is a microcontroller?",
+                            "Respond in a friendly tone suitable for beginners.",
+                            0.4);
 
-### askGemini()
+String technical = askGemini("What is a microcontroller?",
+                             "Respond with a technical description suitable for engineers.",
+                             0.0);
 
-```cpp
-String askGemini(
-    const String& userText,
-    const String& instruction,
-    float temperature
+## Repeat Mode Example
+String reply = askGemini(
+  userInput,
+  "Repeat the user's input verbatim. No commentary.",
+  0.0
 );
-```
 
-**Parameters**
+## Performance Notes (ESP32‑S3)
+The ESP32‑S3’s TLS stack is slower than classic ESP32.  
+AskGemini includes several optimizations:
+- Persistent WiFiClientSecure (avoids repeated TLS handshakes)
+- Keep‑alive enabled
+- 20‑second read timeout for long responses
+- Efficient JSON extraction
 
-| Name | Description |
-|------|-------------|
-| `userText` | The user’s input text |
-| `instruction` | System‑style instruction block |
-| `temperature` | Model creativity (0.0 = deterministic) |
+For even faster responses:
+- Use shorter instructions
+- Use smaller models (gemini-2.0-flash-lite)
+- Limit output tokens
+- Add small delays between back‑to‑back calls
 
-**Returns:**  
-A clean text string extracted from Gemini’s response.
+## License
+MIT License.  
+See LICENSE for details.
 
----
-
-### sanitizeQuip()
-
-```cpp
-char* sanitizeQuip(const char* input);
-```
-
-Escapes backslashes, quotes, and newlines for safe display on small screens.
-
----
-
-## 🛠 Requirements
-
-- ESP32 or ESP32‑S3  
-- Arduino framework  
-- WiFi connection  
-- A valid Gemini API key  
-
----
-
-## 🧩 Error Handling
-
-The library calls your project’s error handler:
-
-```cpp
-void errorHandler(int code);
-```
-
-You may define this however you like — LED blink, display message, safe state, etc.
-
----
-
-## 📁 File Structure
-
-```
-AskGemini/
- ├── AskGemini.h
- ├── AskGemini.cpp
- └── library.properties
-```
-
----
-
-## 🧪 Example Sketch
-
-```cpp
-#include <AskGemini.h>
-
-String Gemini_APIKey = "YOUR_KEY";
-
-void setup() {
-  Serial.begin(115200);
-  WiFi.begin("ssid", "password");
-  while (WiFi.status() != WL_CONNECTED) delay(100);
-}
-
-void loop() {
-  String out = askGemini(
-      "Tell me a short fact about cats.",
-      "Respond with one concise sentence. ",
-      0.2
-  );
-
-  Serial.println(out);
-  delay(5000);
-}
-```
-
+## Credits
+Created by William E. Webb  
+Designed for clarity, reliability, and embedded AI experimentation.
