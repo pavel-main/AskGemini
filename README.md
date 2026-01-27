@@ -112,6 +112,11 @@ The ESP32‑S3’s TLS stack is slower than classic ESP32. AskGemini includes se
 - Limit output tokens (e.g., 16–64)
 - Add small delays between back‑to‑back calls
 
+## 1.0.2
+- Fix: Updated AskGemini.cpp / AskGemini.h to stable Gemini 2.0 Flash implementation.
+- Fix: Improved memory stability and HTTP path handling.
+- Internal: Cleaned logging and clarified error behavior.
+
 ## License
 MIT License.  
 See LICENSE.txt for details.
