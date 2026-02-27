@@ -159,7 +159,7 @@ if (WiFi.status() != WL_CONNECTED) {
         "}],"
         "\"generationConfig\":{"
             "\"temperature\":" + String(temperature, 3) + ","
-            "\"maxOutputTokens\":128"
+            "\"maxOutputTokens\":512"
         "}"
     "}";
 
@@ -198,4 +198,5 @@ if (WiFi.status() != WL_CONNECTED) {
 #endif
 
     return extractAllTextFields(response);
+
 }
